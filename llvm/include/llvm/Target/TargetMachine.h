@@ -134,7 +134,7 @@ public:
     return nullptr;
   }
 
-  /// Parse out the target's MachineFunctionInfo from the YAML reprsentation.
+  /// Parse out the target's MachineFunctionInfo from the YAML representation.
   virtual bool parseMachineFunctionInfo(const yaml::MachineFunctionInfo &,
                                         PerFunctionMIParsingState &PFS,
                                         SMDiagnostic &Error,
