@@ -3046,7 +3046,7 @@ bool Sema::checkTargetAttr(SourceLocation LiteralLoc, StringRef AttrStr) {
       return Diag(LiteralLoc, diag::warn_unsupported_target_attribute)
              << Unsupported << None << Str;
 
-  TargetAttr::ParsedTargetAttr ParsedAttrs = TargetAttr::parse(AttrStr);
+  ParsedTargetAttr ParsedAttrs = TargetAttr::parse(AttrStr);
 
   if (!ParsedAttrs.Architecture.empty() &&
       !Context.getTargetInfo().isValidCPUName(ParsedAttrs.Architecture))
@@ -5754,6 +5754,28 @@ static void handleBPFPreserveAccessIndexAttr(Sema &S, Decl *D,
   Rec->addAttr(::new (S.Context) BPFPreserveAccessIndexAttr(S.Context, AL));
 }
 
+static void handleWebAssemblyExportNameAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
+  if (!isFunctionOrMethod(D)) {
+    S.Diag(D->getLocation(), diag::warn_attribute_wrong_decl_type)
+        << "'export_name'" << ExpectedFunction;
+    return;
+  }
+
+  auto *FD = cast<FunctionDecl>(D);
+  if (FD->isThisDeclarationADefinition()) {
+    S.Diag(D->getLocation(), diag::err_alias_is_definition) << FD << 0;
+    return;
+  }
+
+  StringRef Str;
+  SourceLocation ArgLoc;
+  if (!S.checkStringLiteralArgumentAttr(AL, 0, Str, &ArgLoc))
+    return;
+
+  D->addAttr(::new (S.Context) WebAssemblyExportNameAttr(S.Context, AL, Str));
+  D->addAttr(UsedAttr::CreateImplicit(S.Context));
+}
+
 static void handleWebAssemblyImportModuleAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
   if (!isFunctionOrMethod(D)) {
     S.Diag(D->getLocation(), diag::warn_attribute_wrong_decl_type)
@@ -6579,6 +6601,31 @@ static void handleMSAllocatorAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
   handleSimpleAttribute<MSAllocatorAttr>(S, D, AL);
 }
 
+static void handeAcquireHandleAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
+  if (AL.isUsedAsTypeAttr())
+    return;
+  // Warn if the parameter is definitely not an output parameter.
+  if (const auto *PVD = dyn_cast<ParmVarDecl>(D)) {
+    if (PVD->getType()->isIntegerType()) {
+      S.Diag(AL.getLoc(), diag::err_attribute_output_parameter)
+          << AL.getRange();
+      return;
+    }
+  }
+  StringRef Argument;
+  if (!S.checkStringLiteralArgumentAttr(AL, 0, Argument))
+    return;
+  D->addAttr(AcquireHandleAttr::Create(S.Context, Argument, AL));
+}
+
+template<typename Attr>
+static void handleHandleAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
+  StringRef Argument;
+  if (!S.checkStringLiteralArgumentAttr(AL, 0, Argument))
+    return;
+  D->addAttr(Attr::Create(S.Context, Argument, AL));
+}
+
 //===----------------------------------------------------------------------===//
 // Top Level Sema Entry Points
 //===----------------------------------------------------------------------===//
@@ -6671,6 +6718,9 @@ static void ProcessDeclAttribute(Sema &S, Scope *scope, Decl *D,
     break;
   case ParsedAttr::AT_BPFPreserveAccessIndex:
     handleBPFPreserveAccessIndexAttr(S, D, AL);
+    break;
+  case ParsedAttr::AT_WebAssemblyExportName:
+    handleWebAssemblyExportNameAttr(S, D, AL);
     break;
   case ParsedAttr::AT_WebAssemblyImportModule:
     handleWebAssemblyImportModuleAttr(S, D, AL);
@@ -7352,6 +7402,18 @@ static void ProcessDeclAttribute(Sema &S, Scope *scope, Decl *D,
 
   case ParsedAttr::AT_ArmMveAlias:
     handleArmMveAliasAttr(S, D, AL);
+    break;
+
+  case ParsedAttr::AT_AcquireHandle:
+    handeAcquireHandleAttr(S, D, AL);
+    break;
+
+  case ParsedAttr::AT_ReleaseHandle:
+    handleHandleAttr<ReleaseHandleAttr>(S, D, AL);
+    break;
+
+  case ParsedAttr::AT_UseHandle:
+    handleHandleAttr<UseHandleAttr>(S, D, AL);
     break;
   }
 }

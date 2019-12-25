@@ -1120,27 +1120,27 @@ def OpenCLAccess : Attr {
 }
 
 def OpenCLPrivateAddressSpace : TypeAttr {
-  let Spellings = [Keyword<"__private">, Keyword<"private">];
+  let Spellings = [Keyword<"__private">, Keyword<"private">, Clang<"opencl_private">];
   let Documentation = [OpenCLAddressSpacePrivateDocs];
 }
 
 def OpenCLGlobalAddressSpace : TypeAttr {
-  let Spellings = [Keyword<"__global">, Keyword<"global">];
+  let Spellings = [Keyword<"__global">, Keyword<"global">, Clang<"opencl_global">];
   let Documentation = [OpenCLAddressSpaceGlobalDocs];
 }
 
 def OpenCLLocalAddressSpace : TypeAttr {
-  let Spellings = [Keyword<"__local">, Keyword<"local">];
+  let Spellings = [Keyword<"__local">, Keyword<"local">, Clang<"opencl_local">];
   let Documentation = [OpenCLAddressSpaceLocalDocs];
 }
 
 def OpenCLConstantAddressSpace : TypeAttr {
-  let Spellings = [Keyword<"__constant">, Keyword<"constant">];
+  let Spellings = [Keyword<"__constant">, Keyword<"constant">, Clang<"opencl_constant">];
   let Documentation = [OpenCLAddressSpaceConstantDocs];
 }
 
 def OpenCLGenericAddressSpace : TypeAttr {
-  let Spellings = [Keyword<"__generic">, Keyword<"generic">];
+  let Spellings = [Keyword<"__generic">, Keyword<"generic">, Clang<"opencl_generic">];
   let Documentation = [OpenCLAddressSpaceGenericDocs];
 }
 
@@ -1598,6 +1598,14 @@ def BPFPreserveAccessIndex : InheritableAttr,
   let Subjects = SubjectList<[Record], ErrorDiag>;
   let Documentation = [BPFPreserveAccessIndexDocs];
   let LangOpts = [COnly];
+}
+
+def WebAssemblyExportName : InheritableAttr,
+                            TargetSpecificAttr<TargetWebAssembly> {
+  let Spellings = [Clang<"export_name">];
+  let Args = [StringArgument<"ExportName">];
+  let Documentation = [WebAssemblyExportNameDocs];
+  let Subjects = SubjectList<[Function], ErrorDiag>;
 }
 
 def WebAssemblyImportModule : InheritableAttr,
@@ -2162,16 +2170,6 @@ def Target : InheritableAttr {
   let Subjects = SubjectList<[Function], ErrorDiag>;
   let Documentation = [TargetDocs];
   let AdditionalMembers = [{
-    struct ParsedTargetAttr {
-      std::vector<std::string> Features;
-      StringRef Architecture;
-      StringRef BranchProtection;
-      bool DuplicateArchitecture = false;
-      bool operator ==(const ParsedTargetAttr &Other) const {
-        return DuplicateArchitecture == Other.DuplicateArchitecture &&
-               Architecture == Other.Architecture && Features == Other.Features;
-      }
-    };
     ParsedTargetAttr parse() const {
       return parse(getFeaturesStr());
     }
@@ -2977,22 +2975,22 @@ def Win64 : IgnoredAttr {
 
 def Ptr32 : TypeAttr {
   let Spellings = [Keyword<"__ptr32">];
-  let Documentation = [Undocumented];
+  let Documentation = [Ptr32Docs];
 }
 
 def Ptr64 : TypeAttr {
   let Spellings = [Keyword<"__ptr64">];
-  let Documentation = [Undocumented];
+  let Documentation = [Ptr64Docs];
 }
 
 def SPtr : TypeAttr {
   let Spellings = [Keyword<"__sptr">];
-  let Documentation = [Undocumented];
+  let Documentation = [SPtrDocs];
 }
 
 def UPtr : TypeAttr {
   let Spellings = [Keyword<"__uptr">];
-  let Documentation = [Undocumented];
+  let Documentation = [UPtrDocs];
 }
 
 def MSInheritance : InheritableAttr {
@@ -3472,4 +3470,28 @@ def NoBuiltin : Attr {
   let Args = [VariadicStringArgument<"BuiltinNames">];
   let Subjects = SubjectList<[Function]>;
   let Documentation = [NoBuiltinDocs];
+}
+
+// FIXME: This attribute is not inheritable, it will not be propagated to
+// redecls. [[clang::lifetimebound]] has the same problems. This should be
+// fixed in TableGen (by probably adding a new inheritable flag).
+def AcquireHandle : DeclOrTypeAttr {
+  let Spellings = [Clang<"acquire_handle">];
+  let Args = [StringArgument<"HandleType">];
+  let Subjects = SubjectList<[Function, TypedefName, ParmVar]>;
+  let Documentation = [AcquireHandleDocs];
+}
+
+def UseHandle : InheritableParamAttr {
+  let Spellings = [Clang<"use_handle">];
+  let Args = [StringArgument<"HandleType">];
+  let Subjects = SubjectList<[ParmVar]>;
+  let Documentation = [UseHandleDocs];
+}
+
+def ReleaseHandle : InheritableParamAttr {
+  let Spellings = [Clang<"release_handle">];
+  let Args = [StringArgument<"HandleType">];
+  let Subjects = SubjectList<[ParmVar]>;
+  let Documentation = [ReleaseHandleDocs];
 }

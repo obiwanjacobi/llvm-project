@@ -359,8 +359,12 @@ void PPCAsmPrinter::EmitEndOfAsmFile(Module &M) {
 
 void PPCAsmPrinter::LowerSTACKMAP(StackMaps &SM, const MachineInstr &MI) {
   unsigned NumNOPBytes = MI.getOperand(1).getImm();
+  
+  auto &Ctx = OutStreamer->getContext();
+  MCSymbol *MILabel = Ctx.createTempSymbol();
+  OutStreamer->EmitLabel(MILabel);
 
-  SM.recordStackMap(MI);
+  SM.recordStackMap(*MILabel, MI);
   assert(NumNOPBytes % 4 == 0 && "Invalid number of NOP bytes requested!");
 
   // Scan ahead to trim the shadow.
@@ -385,7 +389,11 @@ void PPCAsmPrinter::LowerSTACKMAP(StackMaps &SM, const MachineInstr &MI) {
 // Lower a patchpoint of the form:
 // [<def>], <id>, <numBytes>, <target>, <numArgs>
 void PPCAsmPrinter::LowerPATCHPOINT(StackMaps &SM, const MachineInstr &MI) {
-  SM.recordPatchPoint(MI);
+  auto &Ctx = OutStreamer->getContext();
+  MCSymbol *MILabel = Ctx.createTempSymbol();
+  OutStreamer->EmitLabel(MILabel);
+
+  SM.recordPatchPoint(*MILabel, MI);
   PatchPointOpers Opers(&MI);
 
   unsigned EncodedBytes = 0;
@@ -1839,6 +1847,8 @@ void PPCAIXAsmPrinter::EmitEndOfAsmFile(Module &M) {
   MCSectionXCOFF *TOCBaseSection = OutStreamer->getContext().getXCOFFSection(
       StringRef("TOC"), XCOFF::XMC_TC0, XCOFF::XTY_SD, XCOFF::C_HIDEXT,
       SectionKind::getData());
+  // The TOC-base always has 0 size, but 4 byte alignment.
+  TOCBaseSection->setAlignment(Align(4));
   // Switch to section to emit TOC base.
   OutStreamer->SwitchSection(TOCBaseSection);
 
@@ -1881,39 +1891,42 @@ PPCAIXAsmPrinter::getMCSymbolForTOCPseudoMO(const MachineOperand &MO) {
   // declaration of a function, then XSym is an external referenced symbol.
   // Hence we may need to explictly create a MCSectionXCOFF for it so that we
   // can return its symbol later.
-  if (GO->isDeclaration() && !XSym->hasContainingCsect()) {
-    // Make sure the storage class is set.
-    const XCOFF::StorageClass SC =
-        TargetLoweringObjectFileXCOFF::getStorageClassForGlobal(GO);
-    XSym->setStorageClass(SC);
+  if (GO->isDeclaration()) {
+    if (!XSym->hasContainingCsect()) {
+      // Make sure the storage class is set.
+      const XCOFF::StorageClass SC =
+          TargetLoweringObjectFileXCOFF::getStorageClassForGlobal(GO);
+      XSym->setStorageClass(SC);
 
-    MCSectionXCOFF *Csect = OutStreamer->getContext().getXCOFFSection(
-        XSym->getName(), isa<Function>(GO) ? XCOFF::XMC_DS : XCOFF::XMC_UA,
-        XCOFF::XTY_ER, SC, SectionKind::getMetadata());
-    XSym->setContainingCsect(Csect);
-
-    return Csect->getQualNameSymbol();
-  }
-
-  // Handle initialized global variables.
-  if (GV) {
-    SectionKind GVKind = getObjFileLowering().getKindForGlobal(GV, TM);
-
-    // If the operand is a common then we should refer to the csect symbol.
-    if (GVKind.isCommon() || GVKind.isBSSLocal()) {
-      MCSectionXCOFF *Csect = cast<MCSectionXCOFF>(
-          getObjFileLowering().SectionForGlobal(GV, GVKind, TM));
-      return Csect->getQualNameSymbol();
+      MCSectionXCOFF *Csect = OutStreamer->getContext().getXCOFFSection(
+          XSym->getName(), isa<Function>(GO) ? XCOFF::XMC_DS : XCOFF::XMC_UA,
+          XCOFF::XTY_ER, SC, SectionKind::getMetadata());
+      XSym->setContainingCsect(Csect);
     }
 
-    // Other global variables are refered to by labels inside of a single csect,
-    // so refer to the label directly.
-    return getSymbol(GV);
+    return XSym->getContainingCsect()->getQualNameSymbol();
   }
 
-  // If the MO is a function, we want to make sure to refer to the function
-  // descriptor csect.
-  return XSym->getContainingCsect()->getQualNameSymbol();
+  // Handle initialized global variables and defined functions.
+  SectionKind GOKind = getObjFileLowering().getKindForGlobal(GO, TM);
+
+  if (GOKind.isText()) {
+    // If the MO is a function, we want to make sure to refer to the function
+    // descriptor csect.
+    return OutStreamer->getContext()
+        .getXCOFFSection(XSym->getName(), XCOFF::XMC_DS, XCOFF::XTY_SD,
+                         XCOFF::C_HIDEXT, SectionKind::getData())
+        ->getQualNameSymbol();
+  } else if (GOKind.isCommon() || GOKind.isBSSLocal()) {
+    // If the operand is a common then we should refer to the csect symbol.
+    return cast<MCSectionXCOFF>(
+               getObjFileLowering().SectionForGlobal(GO, GOKind, TM))
+        ->getQualNameSymbol();
+  }
+
+  // Other global variables are refered to by labels inside of a single csect,
+  // so refer to the label directly.
+  return getSymbol(GV);
 }
 
 /// createPPCAsmPrinterPass - Returns a pass that prints the PPC assembly code

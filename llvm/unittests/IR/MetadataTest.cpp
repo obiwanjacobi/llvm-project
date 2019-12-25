@@ -2059,7 +2059,7 @@ TEST_F(DIModuleTest, get) {
   EXPECT_EQ(Name, N->getName());
   EXPECT_EQ(ConfigMacro, N->getConfigurationMacros());
   EXPECT_EQ(Includes, N->getIncludePath());
-  EXPECT_EQ(Sysroot, N->getISysRoot());
+  EXPECT_EQ(Sysroot, N->getSysRoot());
   EXPECT_EQ(N, DIModule::get(Context, Scope, Name,
                              ConfigMacro, Includes, Sysroot));
   EXPECT_NE(N, DIModule::get(Context, getFile(), Name,
@@ -2924,15 +2924,15 @@ TEST_F(DebugVariableTest, DenseMap) {
   DebugVariableMap.insert({DebugVariableB, 6});
   DebugVariableMap.insert({DebugVariableFragB, 12});
 
-  EXPECT_EQ(DebugVariableMap.count(DebugVariableA), 1);
-  EXPECT_EQ(DebugVariableMap.count(DebugVariableInlineA), 1);
-  EXPECT_EQ(DebugVariableMap.count(DebugVariableB), 1);
-  EXPECT_EQ(DebugVariableMap.count(DebugVariableFragB), 1);
+  EXPECT_EQ(DebugVariableMap.count(DebugVariableA), 1u);
+  EXPECT_EQ(DebugVariableMap.count(DebugVariableInlineA), 1u);
+  EXPECT_EQ(DebugVariableMap.count(DebugVariableB), 1u);
+  EXPECT_EQ(DebugVariableMap.count(DebugVariableFragB), 1u);
 
-  EXPECT_EQ(DebugVariableMap.find(DebugVariableA)->second, 2);
-  EXPECT_EQ(DebugVariableMap.find(DebugVariableInlineA)->second, 3);
-  EXPECT_EQ(DebugVariableMap.find(DebugVariableB)->second, 6);
-  EXPECT_EQ(DebugVariableMap.find(DebugVariableFragB)->second, 12);
+  EXPECT_EQ(DebugVariableMap.find(DebugVariableA)->second, 2u);
+  EXPECT_EQ(DebugVariableMap.find(DebugVariableInlineA)->second, 3u);
+  EXPECT_EQ(DebugVariableMap.find(DebugVariableB)->second, 6u);
+  EXPECT_EQ(DebugVariableMap.find(DebugVariableFragB)->second, 12u);
 }
 
 } // end namespace
