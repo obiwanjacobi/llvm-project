@@ -45,8 +45,6 @@ def SDT_Z80Shift        : SDTypeProfile<1, 2, [SDTCisSameAs<0, 1>,
 //===----------------------------------------------------------------------===//
 def Z80call          : SDNode<"Z80ISD::CALL", SDT_Z80Call,
                      [SDNPHasChain, SDNPOutGlue, SDNPOptInGlue, SDNPVariadic]>;
-// def Z80callseq_start : SDNode<"ISD::CALLSEQ_START", SDT_Z80CallSeqStart,
-//                      [SDNPHasChain, SDNPOutGlue]>;
 def Z80callseq_start : SDNode<"ISD::CALLSEQ_START", SDT_Z80CallSeqStart,
                       [SDNPHasChain, SDNPOutGlue]>;
 def Z80callseq_end   : SDNode<"ISD::CALLSEQ_END", SDT_Z80CallSeqEnd,
@@ -231,7 +229,6 @@ def LD8rr : IRyRz<0x40, (outs GR8:$dst), (ins GR8:$src),
 let isReMaterializable = 1, isAsCheapAsAMove = 1 in {
   def LD8ri  : IRyI8<0x06,  (outs GR8:$dst),  (ins i8imm:$src),
     "ld\t$dst, $src", [(set GR8:$dst, imm:$src)]>;
-  //Special case of this for Knight variant hard coded in Z80KnightInstPrinter
   def LD16ri : IRpI16<0x01, (outs GR16:$dst), (ins i16imm:$src), 
     "ld\t$dst, $src", [(set GR16:$dst, imm:$src)]>;
 }

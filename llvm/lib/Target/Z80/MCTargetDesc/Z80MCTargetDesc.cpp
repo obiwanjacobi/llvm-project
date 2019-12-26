@@ -14,7 +14,6 @@
 #include "Z80MCTargetDesc.h"
 #include "Z80MCAsmInfo.h"
 #include "Z80InstPrinter.h"
-#include "Z80KnightInstPrinter.h"
 #include "llvm/MC/MCCodeEmitter.h"
 #include "llvm/MC/MCInstrInfo.h"
 #include "llvm/MC/MCRegisterInfo.h"
@@ -62,11 +61,7 @@ static MCInstPrinter *createZ80MCInstPrinter(const Triple &T,
   unsigned SyntaxVariant, const MCAsmInfo &MAI, const MCInstrInfo &MII,
   const MCRegisterInfo &MRI) {
 
-  if (SyntaxVariant == 0)
-      return new Z80InstPrinter(MAI, MII, MRI);
-  if (SyntaxVariant == 1)
-      return new Z80KnightInstPrinter(MAI, MII, MRI);
-  return 0;
+    return new Z80InstPrinter(MAI, MII, MRI);
 }
 
 static MCAsmInfo *createZ80MCAsmInfo(const MCRegisterInfo &MRI, const Triple &TT, const MCTargetOptions &Options) {

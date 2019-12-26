@@ -64,7 +64,6 @@ StringRef Triple::getArchTypeName(ArchType Kind) {
   case spir:           return "spir";
   case spir64:         return "spir64";
   case z80:            return "z80";
-  case z80knight:      return "z80knight";
   case kalimba:        return "kalimba";
   case lanai:          return "lanai";
   case shave:          return "shave";
@@ -139,8 +138,7 @@ StringRef Triple::getArchTypePrefix(ArchType Kind) {
   case spir:
   case spir64:      return "spir";
 
-  case z80:
-  case z80knight:   return "z80";
+  case z80:         return "z80";
 
   case kalimba:     return "kalimba";
   case lanai:       return "lanai";
@@ -315,7 +313,6 @@ Triple::ArchType Triple::getArchTypeForLLVMName(StringRef Name) {
     .Case("spir", spir)
     .Case("spir64", spir64)
     .Case("z80", z80)
-    .Case("z80knight", z80knight)
     .Case("kalimba", kalimba)
     .Case("lanai", lanai)
     .Case("shave", shave)
@@ -445,7 +442,6 @@ static Triple::ArchType parseArch(StringRef ArchName) {
     .Case("spir", Triple::spir)
     .Case("spir64", Triple::spir64)
     .Case("z80", Triple::z80)
-    .Case("z80knight", Triple::z80knight)
     .StartsWith("kalimba", Triple::kalimba)
     .Case("lanai", Triple::lanai)
     .Case("shave", Triple::shave)
@@ -712,7 +708,6 @@ static Triple::ObjectFormatType getDefaultFormat(const Triple &T) {
   case Triple::thumbeb:
   case Triple::xcore:
   case Triple::z80:
-  case Triple::z80knight:
     return Triple::ELF;
 
   case Triple::ppc:
@@ -1245,7 +1240,6 @@ static unsigned getArchPointerBitWidth(llvm::Triple::ArchType Arch) {
   case llvm::Triple::avr:
   case llvm::Triple::msp430:
   case llvm::Triple::z80:
-  case llvm::Triple::z80knight:
     return 16;
 
   case llvm::Triple::aarch64_32:
@@ -1327,7 +1321,6 @@ Triple Triple::get32BitArchVariant() const {
   case Triple::systemz:
   case Triple::ppc64le:
   case Triple::z80:
-  case Triple::z80knight:
     T.setArch(UnknownArch);
     break;
 
@@ -1396,7 +1389,6 @@ Triple Triple::get64BitArchVariant() const {
   case Triple::tcele:
   case Triple::xcore:
   case Triple::z80:
-  case Triple::z80knight:
   case Triple::sparcel:
   case Triple::shave:
     T.setArch(UnknownArch);

@@ -17,22 +17,18 @@
 #include "llvm/Support/CommandLine.h"
 using namespace llvm;
 
-
 enum AsmWriterFlavorZ80 {
-  // Note: This numbering has to match the GCC assembler dialects for inline
-  // asm alternatives to work right.
-  Metal = 0, Knight = 1
+  Metal = 0
 };
 
 static cl::opt<AsmWriterFlavorZ80>
 AsmWriterFlavor("z80-asm-syntax", cl::init(Metal),
   cl::desc("Choose style of code to emit from z80 backend:"),
-  cl::values(clEnumValN(Metal,   "metal",   "Emit Metal (bare) z80 assembly"),
-             clEnumValN(Knight, "knight", "Emit KnightOS z80 assembly")));
+  cl::values(clEnumValN(Metal,   "metal",   "Emit Metal (bare) z80 assembly")));
 
 Z80MCAsmInfo::Z80MCAsmInfo(const Triple &TT)
 {
-    AssemblerDialect = (AsmWriterFlavor == Knight) ? 1 : 0;
+    AssemblerDialect = 0;
     
     CodePointerSize = 2;
     CalleeSaveStackSlotSize = 2;

@@ -28,7 +28,6 @@ namespace llvm {
   class Triple;
 
   extern Target TheZ80Target;
-  extern Target TheZ80KnightOSTarget;
 
   MCCodeEmitter *createZ80MCCodeEmitter(const MCInstrInfo &MCII,
     const MCRegisterInfo &MRI, MCContext &Ctx);
