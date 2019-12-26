@@ -9,6 +9,7 @@
 
 #include "MCTargetDesc/Z80MCTargetDesc.h"
 #include "MCTargetDesc/Z80FixupKinds.h"
+#include "MCTargetDesc/Z80ELFObjectWriter.h"
 #include "llvm/MC/MCAsmBackend.h"
 #include "llvm/MC/MCMachObjectWriter.h"
 #include "llvm/MC/MCObjectWriter.h"
@@ -74,31 +75,25 @@ namespace {
                             const MCValue &Target, MutableArrayRef<char> Data,
                             uint64_t Value, bool IsResolved,
                             const MCSubtargetInfo *STI) const {
-
     }
 
     bool writeNopData(raw_ostream &OS, uint64_t Count) const {
-      for (uint64_t i = 0; i < Count; i++)
+      for (uint64_t i = 0; i < Count; i++) {
         OS.write(0);
+      }
       return true;
     }
 
     std::unique_ptr<MCObjectTargetWriter> createObjectTargetWriter() const {
-      // FIXME
-      llvm_unreachable("createObjectTargetWriter() unimplemented");
+      return createZ80ELFObjectWriter(0);
     }
 
-    std::unique_ptr<MCObjectWriter> createObjectWriter(raw_pwrite_stream &OS) const {
-      // FIXME
-      llvm_unreachable("createObjectWriter() unimplemented");
-    }
   }; // end class Z80AsmBackend
 } // end namespace
 
 MCAsmBackend *llvm::createZ80AsmBackend(const Target &T,
                                         const MCSubtargetInfo &STI,
                                         const MCRegisterInfo &MRI,
-                                        const MCTargetOptions &Options)
-{
+                                        const MCTargetOptions &Options) {
   return new Z80AsmBackend(T);
 }

@@ -123,7 +123,8 @@ enum { EV_NONE = 0, EV_CURRENT = 1 };
 
 // Machine architectures
 // See current registered ELF machine architectures at:
-//    http://www.uxsglobal.com/developers/gabi/latest/ch4.eheader.html
+//    http://www.uxsglobal.com/developers/gabi/latest/ch4.eheader.html  <= dead
+//    https://www.sco.com/developers/gabi/latest/ch4.eheader.html       <= was it this one?
 enum {
   EM_NONE = 0,           // No machine
   EM_M32 = 1,            // AT&T WE 32100
