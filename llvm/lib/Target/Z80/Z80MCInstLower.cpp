@@ -19,9 +19,8 @@
 #include "llvm/IR/Mangler.h"
 using namespace llvm;
 
-//Z80MCInstLower::Z80MCInstLower(Mangler *mang, const MachineFunction &mf, Z80AsmPrinter &asmprinter)
 Z80MCInstLower::Z80MCInstLower(const MachineFunction &mf, Z80AsmPrinter &asmprinter)
-  : Ctx(mf.getContext()), /*Mang(mang),*/ MF(mf), TM(mf.getTarget()),
+  : Ctx(mf.getContext()), MF(mf), TM(mf.getTarget()),
   MAI(*TM.getMCAsmInfo()), AsmPrinter(asmprinter)
 {}
 

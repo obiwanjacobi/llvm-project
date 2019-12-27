@@ -26,7 +26,6 @@ Z80AsmPrinter::Z80AsmPrinter(TargetMachine& TM, std::unique_ptr<MCStreamer> Stre
 
 void Z80AsmPrinter::EmitInstruction(const MachineInstr *MI)
 {
-  //Z80MCInstLower MCInstLowering(Mang, *MF, *this);
   Z80MCInstLower MCInstLowering(*MF, *this);
 
   MCInst TmpInst;

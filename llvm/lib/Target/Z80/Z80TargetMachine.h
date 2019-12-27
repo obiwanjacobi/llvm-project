@@ -20,6 +20,7 @@
 #include "Z80InstrInfo.h"
 #include "Z80SelectionDAGInfo.h"
 #include "Z80Subtarget.h"
+#include "Z80TargetLoweringObjectFile.h"
 #include "llvm/IR/DataLayout.h"
 
 namespace llvm {
@@ -29,6 +30,8 @@ namespace llvm {
     Z80SelectionDAGInfo TSInfo;
     Z80Subtarget Subtarget;
     Z80TargetLowering TLInfo;
+    std::unique_ptr<Z80TargetLoweringObjectFile> TLOF;
+    
   public:
     Z80TargetMachine(const Target &T, const Triple &TT,
       StringRef CPU, StringRef FS, const TargetOptions &Options,
@@ -46,22 +49,12 @@ namespace llvm {
       return &TSInfo;
     }
     virtual const Z80Subtarget *getSubtargetImpl() const { return &Subtarget; }
-    virtual const Z80TargetLowering *getTargetLowering() const {
-      return &TLInfo;
-    }
+    virtual const Z80TargetLowering *getTargetLowering() const { return &TLInfo; }
+    virtual TargetLoweringObjectFile *getObjFileLowering() const { return TLOF.get(); }
+    
     virtual TargetPassConfig *createPassConfig(PassManagerBase &PM);
   }; // end class Z80TargetMachine
-  
-  class Z80MetalTargetMachine : public Z80TargetMachine {
-    virtual void anchor();
-  public:
-    Z80MetalTargetMachine(const Target &T, const Triple &TT,
-      StringRef CPU, StringRef FS, const TargetOptions &Options,
-      Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
-      CodeGenOpt::Level OL, bool JIT);
-  };
-  
-  
+    
 } // end namespace llvm
 
 #endif

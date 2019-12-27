@@ -21,6 +21,7 @@ add_llvm_target(Z80CodeGen
   Z80RegisterInfo.cpp
   Z80SelectionDAGInfo.cpp
   Z80Subtarget.cpp
+  Z80TargetLoweringObjectFile.cpp
   Z80TargetMachine.cpp
 )
 

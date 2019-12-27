@@ -27,20 +27,21 @@ namespace llvm {
 
   class Z80MCInstLower {
     MCContext &Ctx;
-    //Mangler *Mang;
     const MachineFunction &MF;
     const TargetMachine &TM;
     const MCAsmInfo &MAI;
     Z80AsmPrinter &AsmPrinter;
+
   public:
-    // Z80MCInstLower(Mangler *mang, const MachineFunction &mf, Z80AsmPrinter &asmprinter);
     Z80MCInstLower(const MachineFunction &mf, Z80AsmPrinter &asmprinter);
     void Lower(const MachineInstr *MI, MCInst &OutMI) const;
 
+  private:
     MCOperand LowerSymbolOperand(const MachineOperand &MO, MCSymbol *Sym) const;
 
     MCSymbol *GetGlobalAddressSymbol(const MachineOperand &MO) const;
     MCSymbol *GetExternalSymbolSymbol(const MachineOperand &MO) const;
+
   }; // end class Z80MCInstLower
 } // end namespace llvm
 

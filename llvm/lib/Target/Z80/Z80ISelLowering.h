@@ -1,4 +1,4 @@
-//===-- Z80ISelLowering.h - X86 DAG Lowering Interface ----------*- C++ -*-===//
+//===-- Z80ISelLowering.h - Z80 DAG Lowering Interface ----------*- C++ -*-===//
 //
 //                     The LLVM Compiler Infrastructure
 //

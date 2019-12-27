@@ -50,13 +50,6 @@ static MCSubtargetInfo *createZ80MCSubtargetInfo(const Triple &TT,
     return createZ80MCSubtargetInfoImpl(TT, CPU, Features);
 }
 
-// static MCCodeGenInfo *createZ80MCCodeGenInfo(const Triple &TT, Reloc::Model RM,
-//   CodeModel::Model CM, CodeGenOpt::Level OL) {
-//     MCCodeGenInfo *X = new MCCodeGenInfo();
-//     X->initMCCodeGenInfo(RM, CM, OL);
-//     return X;
-// }
-
 static MCInstPrinter *createZ80MCInstPrinter(const Triple &T,
   unsigned SyntaxVariant, const MCAsmInfo &MAI, const MCInstrInfo &MII,
   const MCRegisterInfo &MRI) {
@@ -69,30 +62,14 @@ static MCAsmInfo *createZ80MCAsmInfo(const MCRegisterInfo &MRI, const Triple &TT
 }
 
 extern "C" void LLVMInitializeZ80TargetMC() {
-  // Register the MC asm info
   RegisterMCAsmInfoFn X(TheZ80Target, createZ80MCAsmInfo);
 
-  // Register the MC codegen info
-  //TargetRegistry::RegisterMCCodeGenInfo(TheZ80Target, createZ80MCCodeGenInfo);
-
-  // Register the MC instruction info
   TargetRegistry::RegisterMCInstrInfo(TheZ80Target, createZ80MCInstrInfo);
-
-  // Register the MC register info
   TargetRegistry::RegisterMCRegInfo(TheZ80Target, createZ80MCRegisterInfo);
-
-  // Register the MC subtarget info
   TargetRegistry::RegisterMCSubtargetInfo(TheZ80Target, createZ80MCSubtargetInfo);
-
-  // Register the MCInstPrinter
   TargetRegistry::RegisterMCInstPrinter(TheZ80Target, createZ80MCInstPrinter);
-
-  // Register the MCCodeEmitter
   TargetRegistry::RegisterMCCodeEmitter(TheZ80Target, createZ80MCCodeEmitter);
-
-  // Register the MCAsmBackend
   TargetRegistry::RegisterMCAsmBackend(TheZ80Target, createZ80AsmBackend);
   
   //TargetRegistry::RegisterAsmStreamer(TheZ80Target, createZ80AsmStreamer)
-  
 }
